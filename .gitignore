@@ -1,0 +1,16 @@
+avg_cefhelper
+avg_cefplugin.ini
+cef.pak
+cef_100_percent.pak
+cef_200_percent.pak
+cef_extensions.pak
+chrome-sandbox
+debug.log
+devtools_resources.pak
+icudtl.dat
+libcef.so
+libwidevinecdmadapter.so
+locales/
+Player
+natives_blob.bin
+snapshot_blob.bin
