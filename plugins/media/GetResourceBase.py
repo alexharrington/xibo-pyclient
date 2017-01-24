@@ -31,8 +31,8 @@ import codecs
 class GetResourceBase(XiboMedia):
     def add(self):
         self.tmpPath = os.path.join(self.libraryDir,self.mediaId + "-cache.html")
-        tmpXML = '<browser id="' + self.mediaNodeName + '" opacity="0" width="' + str(self.width) + '" height="' + str(self.height) + \
-                '" />'
+        tmpXML = '<CEFnode id="' + self.mediaNodeName + '" opacity="0" width="' + str(self.width) + '" height="' + str(self.height) + \
+                '" transparent="' + str(self.browserOptions()[0]) + '" />'
         self.p.enqueue('add',(tmpXML,self.regionNodeName))
 
         # Check updateInterval is set.

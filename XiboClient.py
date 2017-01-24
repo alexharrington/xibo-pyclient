@@ -3,7 +3,7 @@
 
 #
 # Xibo - Digitial Signage - http://www.xibo.org.uk
-# Copyright (C) 2009-2014 Alex Harrington
+# Copyright (C) 2009-2016 Alex Harrington
 #
 # This file is part of Xibo.
 #
@@ -51,7 +51,7 @@ import shutil
 
 from ThirdParty.period.period import in_period
 
-version = "1.6.0-rc2"
+version = "1.8.0-alpha1"
 
 # What layout schema version is supported
 schemaVersion = 1
@@ -3385,6 +3385,10 @@ class XMDS:
         return socket.inet_ntoa(fcntl.ioctl(sck.fileno(),0x8915,struct.pack('256s', ifn[:15]))[20:24])
     
     def getDisk(self):
+        if platform.system() == 'Windows':
+            #free_bytes = ctypes.c_ulonglong(0)
+            #ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(config.get('Main', 'libraryDir'), None, None, ctypes.pointer(free_bytes))
+            return (10000,8000)                                           
         s = os.statvfs(config.get('Main','libraryDir'))
         return (s.f_bsize * s.f_blocks,s.f_bsize * s.f_bavail)
 
@@ -3426,7 +3430,7 @@ class XMDS:
                     else:
                         http_proxy_conf = None
                     
-                    self.server = WSDL.Proxy(self.wsdlFile, http_proxy=http_proxy_conf)
+                    self.server = WSDL.Proxy(unicode(self.wsdlFile, 'utf-8'), http_proxy=http_proxy_conf)
                     
                     self.hasInitialised = True
                     log.log(2,"info",_("Connected to XMDS via WSDL at %s") % self.wsdlFile)
@@ -4402,11 +4406,11 @@ class XiboPlayer(Thread):
 
         # Load the BrowserNode plugin
         try:
-            self.player.loadPlugin("libbrowsernode")
+            self.player.loadPlugin("libavg_cefplugin")
         except RuntimeError:
             print "\n*********************************************************"
-            print "The version of Berkelium installed on this system is not compatible with this version of Xibo."
-            print "Please check you have the correct version of Berkelium installed for this version of the client."
+            print "The version of CEF installed on this system is not compatible with this version of Xibo."
+            print "Please check you have the correct version of CEF installed for this version of the client."
             print "*********************************************************\n"
             os._exit(0)
         
@@ -4482,7 +4486,7 @@ class XiboPlayer(Thread):
         self.player.play()
     
     def keyDown(self,e):
-        if e.keystring == "i":
+        if e.text == "i":
             if self.info:
                 self.info = False
                 self.enqueue('setOpacity',('info',0))
@@ -4515,14 +4519,14 @@ class XiboPlayer(Thread):
         if self.info:
             # Process key strokes that are only active when the info
             # screen is showing
-            if e.keystring == "n":
+            if e.text == "n":
                 self.parent.currentLM.dispose()
             
-            if e.keystring == "r":
+            if e.text == "r":
                 self.parent.downloader.collect()
                 self.parent.scheduler.collect()
 
-            if e.keystring == "l":
+            if e.text == "l":
                 if self.osLog:
                     self.osLog = False
                     self.enqueue('setOpacity',('osLog',0))
@@ -4530,7 +4534,7 @@ class XiboPlayer(Thread):
                     self.osLog = True
                     self.enqueue('setOpacity',('osLog',1))
             
-            if e.keystring == "q":
+            if e.text == "q":
                 #TODO: Fully implement a proper quit function
                 # Allow threads a chance to stop nicely before finally killing
                 # the lot off.
@@ -4676,18 +4680,18 @@ class XiboPlayer(Thread):
                 elif cmd == "browserNavigate":
                     currentNode = self.player.getElementByID(data[0])
                     if data[2] != None:
-                        currentNode.onFinishLoading = data[2]
-                    currentNode.loadUrl(data[1])
+                        currentNode.onLoadEnd = data[2]
+                    currentNode.loadURL(data[1])
                 elif cmd == "browserOptions":
                     currentNode = self.player.getElementByID(data[0])
-                    if not data[1] is None:
-                        currentNode.transparent = data[1]
                     if not data[2] is None:
                         if data[2] == False:
-                            currentNode.executeJavascript("document.body.style.overflow='hidden';")
+                            currentNode.scrollbars = False
+                        else:
+                            currentNode.scrollbars = True
                 elif cmd == "executeJavascript":
                     currentNode = self.player.getElementByID(data[0])
-                    currentNode.executeJavascript(data[1])
+                    currentNode.executeJS(data[1])
                 elif cmd == "zoomIn":
                     # BrowserNode Zoom In
                     currentNode = self.player.getElementByID(data)
@@ -4715,7 +4719,7 @@ class XiboPlayer(Thread):
                     for i in range(1,11):
                         try:
                             currentNode = self.player.getElementByID('counter%s' % i)
-                            currentNode.executeJavascript("updateCounter('%s');" % self.counterValue)
+                            currentNode.executeJS("updateCounter('%s');" % self.counterValue)
                         except:
                             pass
                     

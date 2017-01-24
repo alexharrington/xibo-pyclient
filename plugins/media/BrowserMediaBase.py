@@ -31,7 +31,8 @@ class BrowserMediaBase(XiboMedia):
         self.itemCount = 0
         self.retryCount = 0
         self.tmpPath = os.path.join(self.libraryDir,self.mediaNodeName + "-tmp.html")
-        tmpXML = '<browser id="' + self.mediaNodeName + '" opacity="0" width="' + str(self.width) + '" height="' + str(self.height) + '"/>'
+        tmpXML = '<CEFnode id="' + self.mediaNodeName + '" opacity="0" width="' + str(self.width) + '" height="' + str(self.height) + \
+        '" transparent="' + str(self.browserOptions[0]) + '" />'
         self.p.enqueue('add',(tmpXML,self.regionNodeName))
 
     def run(self):

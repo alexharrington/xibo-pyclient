@@ -14,3 +14,6 @@ locales/
 Player
 natives_blob.bin
 snapshot_blob.bin
+site.cfg
+*.pyc
+data/
